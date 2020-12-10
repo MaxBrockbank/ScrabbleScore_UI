@@ -34,7 +34,15 @@ namespace ScrabbleScore.Tests
     {
         string userInput = "word";
         Game newWord = new Game(userInput);
-        Assert.AreEqual(2, newWord.PlayerScore());
+        Assert.AreEqual(8, newWord.PlayerScore());
+    }
+
+    [TestMethod]
+    public void PlayerScore_CalculateScore2Points_int()
+    {
+        string userInput = "dog";
+        Game newWord = new Game(userInput);
+        Assert.AreEqual(5, newWord.PlayerScore());
     }
   }
 }
