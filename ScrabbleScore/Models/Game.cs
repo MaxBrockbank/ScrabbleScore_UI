@@ -9,6 +9,7 @@ namespace ScrabbleScore.Models
     public char[] ArrayForWord {get; set;}
     public string UserWord {get; set;}
     public int UserScore {get; set;}
+    public string Response {get; set;}
     private static string onePointPattern = @"[aeioulnrst]";
     private static string twoPointPattern = @"[dg]";
     private static string threePointPattern = @"[bcmp]";
