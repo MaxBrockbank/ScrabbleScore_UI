@@ -1,1 +1,7 @@
-<h1> @Model.Response </h1>
+@using ScrabbleScore.Models;
+
+<h1>Your word '@Model.UserWord' is worth @Model.UserScore points</h1>
+
+<p><a href="/game/show">See all the words that have been played!</a></p>
+<p><a href="/game/search">Find played words by score!</a></p>
+

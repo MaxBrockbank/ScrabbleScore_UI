@@ -1,0 +1,8 @@
+@using ScrabbleScore.Models;
+
+<div class="container">
+  @foreach(Game game in @Model)
+    {
+      <h4>@game.UserWord - @game.UserScore </h4>
+    }
+</div>

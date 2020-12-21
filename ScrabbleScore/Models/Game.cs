@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using MySql.Data.MySqlClient;
 
 namespace ScrabbleScore.Models
 {
@@ -9,7 +10,7 @@ namespace ScrabbleScore.Models
     public char[] ArrayForWord {get; set;}
     public string UserWord {get; set;}
     public int UserScore {get; set;}
-    public string Response {get; set;}
+    public int Id {get; set;}
     private static string onePointPattern = @"[aeioulnrst]";
     private static string twoPointPattern = @"[dg]";
     private static string threePointPattern = @"[bcmp]";
@@ -32,6 +33,15 @@ namespace ScrabbleScore.Models
       UserWord = word;
       ArrayForWord = word.ToCharArray();
     }
+
+    public Game (string word, int userScore, int id)
+    {
+      UserScore = userScore;
+      UserWord = word;
+      Id = id;
+    }
+
+    
 
     public int PlayerScore()
     {
@@ -74,5 +84,111 @@ namespace ScrabbleScore.Models
       return UserScore;      
     }
 
+    // public override bool Equals(System.Object otherGame)
+    // {
+    //   if(!(otherGame is Game))
+    //   {
+    //     return false;
+    //   }
+    //   else
+    //   {
+    //     Game newGame = (Game) otherGame;
+    //     bool idEquality = (this.Id == newGame.Id);
+    //     bool wordEquality = (this.UserWord == newGame.UserWord);
+    //     bool scoreEquality = (this.UserScore == newGame.UserScore);
+    //     return (idEquality && wordEquality && scoreEquality);
+    //   }
+    // }
+
+    public static List<Game> GetAll()
+    {
+      List<Game> allWords = new List<Game> { };
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM words;";
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      while (rdr.Read())
+      {
+        int wordId = rdr.GetInt32(2);
+        string userWord = rdr.GetString(0);
+        int userScore = rdr.GetInt32(1);
+        Game newGame = new Game(userWord, userScore, wordId);
+        allWords.Add(newGame);
+      }
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
+      return allWords;
+
+    }
+
+    public void Save()
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+
+      cmd.CommandText = @"INSERT INTO words (word, score) VALUES (@TheWord, @WordScore);";
+      MySqlParameter word = new MySqlParameter();
+      MySqlParameter score = new MySqlParameter();
+      word.ParameterName = "@TheWord";
+      word.Value = this.UserWord;
+      score.ParameterName = "@WordScore";
+      score.Value = this.UserScore;
+      cmd.Parameters.Add(word);
+      cmd.Parameters.Add(score);
+      cmd.ExecuteNonQuery();
+      Id = (int) cmd.LastInsertedId;
+
+      conn.Close();
+      if(conn != null)
+      {
+        conn.Dispose();
+      }
+    }
+
+    public static void ClearAll()
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"DELETE FROM words";
+      cmd.ExecuteNonQuery();
+      conn.Close();
+      if(conn != null)
+      {
+        conn.Dispose();
+      }
+    }
+
+    public static List<Game> Find(int searchScore)
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM words WHERE score >= @WordScore";
+
+      MySqlParameter score = new MySqlParameter();
+      score.ParameterName = "@WordScore";
+      score.Value = searchScore;
+      cmd.Parameters.Add(score);
+
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      List<Game> wordsOfScore = new List<Game>{};
+      while(rdr.Read())
+      {
+        int id = (int) rdr.GetInt32(2);
+        int wordScore = rdr.GetInt32(1);
+        string word = rdr.GetString(0);
+        Game newGame = new Game(word, wordScore, id);
+        wordsOfScore.Add(newGame);
+      }
+      return wordsOfScore;
+
+    }
   }
 }

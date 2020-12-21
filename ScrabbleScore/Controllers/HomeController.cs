@@ -15,9 +15,35 @@ namespace ScrabbleScore.Controllers
     {
       Game newGame = new Game(userInput);
       newGame.PlayerScore();
-      newGame.Response = $"Your word {newGame.UserWord} is equal to {newGame.UserScore} points.";
+      newGame.Save();
       return View(newGame);
     }
+
+    [HttpGet ("/game/show")]
+    public ActionResult AllWords()
+    {
+      List<Game> allWords = Game.GetAll();
+      return View(allWords);
+    }
+
+    [HttpPost("/game")]
+    public ActionResult Delete()
+    {
+      Game.ClearAll();
+      return RedirectToAction("GameStart");
+    }
+
+    [HttpGet("/game/search")]
+    public ActionResult SearchForm()
+    {
+      return View();
+    }
     
+    [HttpPost("/game/search-result")]
+    public ActionResult SearchResult(int score)
+    {
+      List<Game> matches = Game.Find(score);
+      return View(matches);
+    }
   }
 }
